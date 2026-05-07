@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="OpenVoice — Free, open-source AI voice dictation. Speak naturally, get polished text anywhere.">
+  <title>OpenVoice</title>
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/animations.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Background ambient orbs -->
+    <div class="ambient-bg" id="ambientBg">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+    </div>
+
+    <!-- Window chrome (frameless) -->
+    <div class="window-chrome drag-region" id="windowChrome">
+      <div class="window-title">OpenVoice</div>
+      <div class="window-controls no-drag">
+        <button class="win-btn win-minimize" id="btnMinimize" title="Minimize">&#x2013;</button>
+        <button class="win-btn win-close" id="btnClose" title="Close to tray">&#x2715;</button>
+      </div>
+    </div>
+
+    <!-- Onboarding Page -->
+    <div class="page" id="pageOnboarding">
+      <div class="onboarding-container">
+        <!-- Step 1: Welcome -->
+        <div class="onboarding-step active" id="step1">
+          <div class="onboarding-content text-center">
+            <div class="logo-container" id="logoContainer">
+              <div class="logo-icon">
+                <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+                  <defs>
+                    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style="stop-color:#00d4aa"/>
+                      <stop offset="100%" style="stop-color:#7c5cfc"/>
+                    </linearGradient>
+                  </defs>
+                  <circle cx="40" cy="40" r="36" stroke="url(#logoGrad)" stroke-width="3" fill="none" opacity="0.3"/>
+                  <path d="M40 18C36 18 32 22 32 28V42C32 48 36 52 40 52C44 52 48 48 48 42V28C48 22 44 18 40 18Z" fill="url(#logoGrad)" opacity="0.9"/>
+                  <path d="M26 38V42C26 50.837 33.163 58 42 58H40C31.163 58 24 50.837 24 42V38" stroke="url(#logoGrad)" stroke-width="3" stroke-linecap="round" fill="none"/>
+                  <path d="M54 38V42C54 50.837 46.837 58 38 58H40C48.837 58 56 50.837 56 42V38" stroke="url(#logoGrad)" stroke-width="3" stroke-linecap="round" fill="none"/>
+                  <line x1="40" y1="58" x2="40" y2="66" stroke="url(#logoGrad)" stroke-width="3" stroke-linecap="round"/>
+                  <line x1="33" y1="66" x2="47" y2="66" stroke="url(#logoGrad)" stroke-width="3" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div class="logo-rings">
+                <div class="logo-ring ring-1"></div>
+                <div class="logo-ring ring-2"></div>
+                <div class="logo-ring ring-3"></div>
+              </div>
+            </div>
+            <h1 class="heading-xl onboarding-title">Open<span class="text-accent">Voice</span></h1>
+            <p class="text-secondary onboarding-subtitle">Free, open-source AI voice dictation.<br>Speak naturally. Get polished text. Anywhere.</p>
+            <div class="feature-pills">
+              <span class="pill">🎤 Voice to Text</span>
+              <span class="pill">✨ AI Formatting</span>
+              <span class="pill">⌨️ Works Everywhere</span>
+              <span class="pill">🔒 Your API Key</span>
+            </div>
+            <button class="btn btn-primary btn-lg" id="btnGetStarted">
+              Get Started
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 2: API Key -->
+        <div class="onboarding-step" id="step2">
+          <div class="onboarding-content">
+            <div class="step-indicator">
+              <span class="step-dot completed"></span>
+              <span class="step-line"></span>
+              <span class="step-dot active"></span>
+              <span class="step-line"></span>
+              <span class="step-dot"></span>
+            </div>
+            <h2 class="heading-lg">Connect your <span class="text-accent">Gemini</span> API</h2>
+            <p class="text-secondary">OpenVoice uses Google's Gemini AI to transcribe and format your speech. You need a free API key to get started.</p>
+            
+            <div class="api-key-card glass-card">
+              <div class="input-group">
+                <label for="apiKeyInput">Gemini API Key</label>
+                <div class="input-with-btn">
+                  <input type="password" class="input" id="apiKeyInput" placeholder="AIza...">
+                  <button class="btn btn-secondary" id="btnToggleKey" title="Show/Hide">👁</button>
+                </div>
+              </div>
+              <div class="api-status" id="apiStatus"></div>
+              <a href="#" class="get-key-link" id="getKeyLink">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+                Get a free API key from Google AI Studio
+              </a>
+            </div>
+
+            <div class="onboarding-actions">
+              <button class="btn btn-ghost" id="btnBack2">← Back</button>
+              <button class="btn btn-primary" id="btnNext2" disabled>Validate & Continue</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Shortcuts -->
+        <div class="onboarding-step" id="step3">
+          <div class="onboarding-content">
+            <div class="step-indicator">
+              <span class="step-dot completed"></span>
+              <span class="step-line completed"></span>
+              <span class="step-dot completed"></span>
+              <span class="step-line completed"></span>
+              <span class="step-dot active"></span>
+            </div>
+            <h2 class="heading-lg">Choose your <span class="text-accent">model</span></h2>
+            <p class="text-secondary">Select which Gemini model to use for transcription and formatting. You can change this anytime in Settings.</p>
+            
+            <div class="model-list-container" style="margin-top: var(--space-lg); margin-bottom: var(--space-xl);">
+              <div class="model-list" id="onboardingModelList">
+                <div class="model-card glass-card loading-card">
+                  <span class="spinner"></span> Loading available models...
+                </div>
+              </div>
+              <p class="text-sm text-secondary" style="margin-top: var(--space-sm);">💡 Only models that support voice input are shown. The best model is auto-selected.</p>
+            </div>
+
+            <p class="text-secondary" style="margin-bottom: var(--space-sm);"><strong>Keyboard shortcuts</strong> — use from anywhere on your computer:</p>
+            
+            <div class="shortcuts-list">
+              <div class="shortcut-card glass-card">
+                <div class="shortcut-icon">🎤</div>
+                <div class="shortcut-info">
+                  <div class="shortcut-label">Dictate</div>
+                  <div class="shortcut-desc">Hold to speak, release to transcribe</div>
+                </div>
+                <div class="shortcut-keys">
+                  <span class="kbd">Ctrl</span> + <span class="kbd">Shift</span> + <span class="kbd">Space</span>
+                </div>
+              </div>
+              <div class="shortcut-card glass-card">
+                <div class="shortcut-icon">✨</div>
+                <div class="shortcut-info">
+                  <div class="shortcut-label">Command Mode</div>
+                  <div class="shortcut-desc">Select text, then speak a command</div>
+                </div>
+                <div class="shortcut-keys">
+                  <span class="kbd">Ctrl</span> + <span class="kbd">Shift</span> + <span class="kbd">Alt</span> + <span class="kbd">Space</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="onboarding-actions">
+              <button class="btn btn-ghost" id="btnBack3">← Back</button>
+              <button class="btn btn-primary" id="btnFinish">
+                Start Using OpenVoice
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main / Dashboard Page -->
+    <div class="page" id="pageMain">
+      <div class="main-container">
+        <div class="main-sidebar">
+          <div class="sidebar-logo">
+            <svg width="28" height="28" viewBox="0 0 80 80" fill="none">
+              <defs><linearGradient id="sideLogoGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#00d4aa"/><stop offset="100%" style="stop-color:#7c5cfc"/></linearGradient></defs>
+              <path d="M40 18C36 18 32 22 32 28V42C32 48 36 52 40 52C44 52 48 48 48 42V28C48 22 44 18 40 18Z" fill="url(#sideLogoGrad)" opacity="0.9"/>
+              <path d="M26 38V42C26 50.837 33.163 58 42 58H40C31.163 58 24 50.837 24 42V38" stroke="url(#sideLogoGrad)" stroke-width="3" stroke-linecap="round" fill="none"/>
+              <path d="M54 38V42C54 50.837 46.837 58 38 58H40C48.837 58 56 50.837 56 42V38" stroke="url(#sideLogoGrad)" stroke-width="3" stroke-linecap="round" fill="none"/>
+            </svg>
+            <span class="sidebar-logo-text">OpenVoice</span>
+          </div>
+          
+          <nav class="sidebar-nav">
+            <button class="nav-item active" data-page="dashboard" id="navDashboard">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              Dashboard
+            </button>
+            <button class="nav-item" data-page="dictionary" id="navDictionary">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+              Dictionary
+            </button>
+            <button class="nav-item" data-page="snippets" id="navSnippets">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 18l6-6-6-6"/><path d="M8 6l-6 6 6 6"/></svg>
+              Snippets
+            </button>
+            <button class="nav-item" data-page="history" id="navHistory">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              History
+            </button>
+          </nav>
+
+          <div class="sidebar-bottom">
+            <button class="nav-item" id="navSettings">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+              Settings
+            </button>
+          </div>
+        </div>
+
+        <div class="main-content">
+          <!-- Dashboard -->
+          <div class="content-page active" id="dashboardPage">
+            <div class="dashboard-header">
+              <h1 class="heading-lg">Dashboard</h1>
+              <div class="status-badge" id="statusBadge">
+                <span class="status-dot"></span>
+                Ready
+              </div>
+            </div>
+
+            <div class="dashboard-grid">
+              <div class="stat-card glass-card">
+                <div class="stat-icon">🎤</div>
+                <div class="stat-value" id="statWords">0</div>
+                <div class="stat-label">Words Today</div>
+              </div>
+              <div class="stat-card glass-card">
+                <div class="stat-icon">⏱</div>
+                <div class="stat-value" id="statTime">0m</div>
+                <div class="stat-label">Time Saved</div>
+              </div>
+              <div class="stat-card glass-card">
+                <div class="stat-icon">📝</div>
+                <div class="stat-value" id="statSessions">0</div>
+                <div class="stat-label">Sessions</div>
+              </div>
+            </div>
+
+            <!-- Active Style Selector -->
+            <div class="style-selector-card glass-card">
+              <div class="style-selector-header">
+                <div>
+                  <h3 class="heading-sm">Dictation Style</h3>
+                  <p class="text-secondary text-sm" id="styleAutoLabel" style="display:none;">Auto-switching by focused app</p>
+                </div>
+                <div class="style-active-badge" id="activeStyleBadge">💬 Casual Chat</div>
+              </div>
+              <div class="style-grid" id="styleGrid"></div>
+            </div>
+
+            <div class="quick-test glass-card">
+              <h3 class="heading-md">Quick Test</h3>
+              <p class="text-secondary text-sm">Test your microphone and dictation right here. Press the button or use your shortcut.</p>
+              <div class="test-area">
+                <button class="mic-btn" id="btnMicTest">
+                  <div class="mic-btn-rings">
+                    <div class="mic-ring"></div>
+                    <div class="mic-ring"></div>
+                  </div>
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                </button>
+                <div class="recording-timer" id="recordingTimer" style="display: none;">
+                  <span class="recording-dot"></span>
+                  <span class="recording-time" id="recordingTime">0:00</span>
+                </div>
+                <div class="waveform-container" id="waveformContainer">
+                  <canvas id="waveformCanvas" width="300" height="60"></canvas>
+                </div>
+              </div>
+              <div class="test-output glass-card" id="testOutput">
+                <span class="text-muted">Your transcription will appear here...</span>
+              </div>
+            </div>
+
+            <!-- Saved Recordings -->
+            <div class="failed-recordings-section glass-card" id="failedRecordingsSection" style="display: none;">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: var(--space-sm);">
+                <h3 class="heading-md" style="margin: 0;">💾 Saved Recordings</h3>
+                <span class="failed-count-badge" id="failedCountBadge" style="background: var(--text-muted);">0</span>
+              </div>
+              <p class="text-secondary text-sm" style="margin-bottom: var(--space-md);">Your recordings are saved safely on disk. You can replay or retry transcription anytime.</p>
+              <div id="failedRecordingsList"></div>
+            </div>
+          </div>
+
+          <!-- Dictionary Page -->
+          <div class="content-page" id="dictionaryPage">
+            <div class="dashboard-header">
+              <h1 class="heading-lg">Personal Dictionary</h1>
+              <button class="btn btn-primary btn-sm" id="btnAddWord">+ Add Word</button>
+            </div>
+            <p class="text-secondary" style="margin-bottom: var(--space-lg);">Add custom words, names, and technical terms so OpenVoice always gets them right.</p>
+            <div class="dictionary-input glass-card" id="dictionaryInput" style="display:none;">
+              <div class="input-with-btn">
+                <input type="text" class="input" id="newWordInput" placeholder="Type a word or phrase...">
+                <button class="btn btn-primary" id="btnSaveWord">Add</button>
+                <button class="btn btn-ghost" id="btnCancelWord">Cancel</button>
+              </div>
+            </div>
+            <div class="dictionary-list" id="dictionaryList">
+              <div class="empty-state">
+                <div class="empty-icon">📖</div>
+                <p>No words added yet</p>
+                <p class="text-sm text-secondary">Add custom words to improve accuracy</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Snippets Page -->
+          <div class="content-page" id="snippetsPage">
+            <div class="dashboard-header">
+              <h1 class="heading-lg">Voice Snippets</h1>
+              <button class="btn btn-primary btn-sm" id="btnAddSnippet">+ New Snippet</button>
+            </div>
+            <p class="text-secondary" style="margin-bottom: var(--space-lg);">Create voice shortcuts — say a trigger phrase and OpenVoice will expand it into your full text.</p>
+            <div class="snippet-form glass-card" id="snippetForm" style="display:none;">
+              <div class="input-group">
+                <label>Trigger Phrase</label>
+                <input type="text" class="input" id="snippetTrigger" placeholder='e.g. "my email"'>
+              </div>
+              <div class="input-group" style="margin-top: var(--space-md);">
+                <label>Expansion Text</label>
+                <textarea class="input" id="snippetExpansion" rows="3" placeholder="e.g. john.doe@example.com"></textarea>
+              </div>
+              <div class="flex gap-sm" style="margin-top: var(--space-md);">
+                <button class="btn btn-primary" id="btnSaveSnippet">Save Snippet</button>
+                <button class="btn btn-ghost" id="btnCancelSnippet">Cancel</button>
+              </div>
+            </div>
+            <div class="snippet-list" id="snippetList">
+              <div class="empty-state">
+                <div class="empty-icon">⚡</div>
+                <p>No snippets yet</p>
+                <p class="text-sm text-secondary">Create shortcuts for text you use often</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- History Page -->
+          <div class="content-page" id="historyPage">
+            <div class="dashboard-header">
+              <h1 class="heading-lg">History</h1>
+              <button class="btn btn-ghost btn-sm" id="btnClearHistory">Clear All</button>
+            </div>
+            <div class="history-list" id="historyList">
+              <div class="empty-state">
+                <div class="empty-icon">📋</div>
+                <p>No history yet</p>
+                <p class="text-sm text-secondary">Your transcriptions will appear here</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Page -->
+    <div class="page" id="pageSettings">
+      <div class="settings-container">
+        <div class="settings-header">
+          <button class="btn btn-ghost" id="btnBackSettings">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Back
+          </button>
+          <h1 class="heading-lg">Settings</h1>
+        </div>
+
+        <div class="settings-sections">
+          <!-- API Key -->
+          <div class="section-title">API Configuration</div>
+          <div class="glass-card settings-card">
+            <div class="setting-row">
+              <div class="setting-info">
+                <div class="setting-title">Gemini API Key</div>
+                <div class="setting-desc" id="settingsApiPreview">••••••••</div>
+              </div>
+              <button class="btn btn-secondary btn-sm" id="btnChangeKey">Change</button>
+            </div>
+          </div>
+
+          <!-- Shortcuts -->
+          <div class="section-title">Keyboard Shortcuts</div>
+          <div class="glass-card settings-card">
+            <div class="setting-row">
+              <div class="setting-info">
+                <div class="setting-title">Dictation Shortcut</div>
+                <div class="setting-desc">Hold to record, release to transcribe</div>
+              </div>
+              <div class="shortcut-keys"><span class="kbd" id="dictationShortcutDisplay">Ctrl+Shift+Space</span></div>
+            </div>
+            <div class="divider"></div>
+            <div class="setting-row">
+              <div class="setting-info">
+                <div class="setting-title">Command Mode Shortcut</div>
+                <div class="setting-desc">Select text, then speak a command</div>
+              </div>
+              <div class="shortcut-keys"><span class="kbd" id="commandShortcutDisplay">Ctrl+Shift+Alt+Space</span></div>
+            </div>
+          </div>
+
+          <!-- Styles -->
+          <div class="section-title">Styles & Auto-Switch</div>
+          <div class="glass-card settings-card">
+            <div class="setting-row">
+              <div class="setting-info">
+                <div class="setting-title">Auto-Switch by App</div>
+                <div class="setting-desc">Automatically change dictation style based on the focused application</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="toggleAutoStyle">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="divider"></div>
+            <div class="setting-row" style="flex-direction: column; align-items: stretch;">
+              <div style="margin-bottom: var(--space-md);">
+                <div class="setting-title">App → Style Rules</div>
+                <div class="setting-desc">Override which style is used for specific apps</div>
+              </div>
+              <div class="app-rules-list" id="appRulesList" style="max-height: 240px; overflow-y: auto;"></div>
+            </div>
+          </div>
+
+          <!-- Dictation -->
+          <div class="section-title">Dictation</div>
+          <div class="glass-card settings-card">
+            <div class="setting-row" style="flex-direction: column; align-items: stretch;">
+              <div class="flex items-center justify-between" style="margin-bottom: var(--space-md);">
+                <div class="setting-info" style="margin-right: 0;">
+                  <div class="setting-title">AI Model</div>
+                  <div class="setting-desc">Select a Gemini model for transcription and formatting</div>
+                </div>
+              </div>
+              <div class="model-list" id="settingsModelList" style="max-height: 200px;"></div>
+            </div>
+            <div class="divider"></div>
+            <div class="setting-row">
+              <div class="setting-info">
+                <div class="setting-title">AI Formatting</div>
+                <div class="setting-desc">Clean up filler words, add punctuation, and format text</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="toggleFormatting" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="divider"></div>
+            <div class="setting-row">
+              <div class="setting-info">
+                <div class="setting-title">Language</div>
+                <div class="setting-desc">Primary dictation language</div>
+              </div>
+              <select class="select" id="selectLanguage" style="width: 200px;">
+                <option value="en">English</option>
+                <option value="es">Spanish</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+                <option value="it">Italian</option>
+                <option value="pt">Portuguese</option>
+                <option value="ja">Japanese</option>
+                <option value="ko">Korean</option>
+                <option value="zh">Chinese</option>
+                <option value="ar">Arabic</option>
+                <option value="hi">Hindi</option>
+                <option value="auto">Auto-detect</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- System -->
+          <div class="section-title">System</div>
+          <div class="glass-card settings-card">
+            <div class="setting-row">
+              <div class="setting-info">
+                <div class="setting-title">Start with Windows</div>
+                <div class="setting-desc">Launch OpenVoice when you log in</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="toggleAutoLaunch">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="divider"></div>
+            <div class="setting-row">
+              <div class="setting-info">
+                <div class="setting-title">Keep Successful Recordings</div>
+                <div class="setting-desc">Don't auto-delete audio files after transcription</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="toggleKeepRecordings">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="divider"></div>
+            <div class="setting-row">
+              <div class="setting-info">
+                <div class="setting-title">Show Overlay Widget</div>
+                <div class="setting-desc">Floating indicator while dictating</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="toggleOverlay" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="divider"></div>
+            <div class="setting-row">
+              <div class="setting-info">
+                <div class="setting-title">Notification Sounds</div>
+                <div class="setting-desc">Play sounds for start/stop/error</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="toggleSounds" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- About -->
+          <div class="section-title">About</div>
+          <div class="glass-card settings-card">
+            <div class="setting-row">
+              <div class="setting-info">
+                <div class="setting-title">OpenVoice</div>
+                <div class="setting-desc" id="appVersionLabel">Version 1.0.0 - MIT License</div>
+              </div>
+              <button class="btn btn-ghost btn-sm" id="btnGitHub">
+                GitHub
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+              </button>
+            </div>
+            <div class="divider"></div>
+            <div class="setting-row update-setting-row">
+              <div class="setting-info">
+                <div class="setting-title">Updates</div>
+                <div class="setting-desc" id="updateStatusText">Packaged builds check GitHub Releases for updates.</div>
+                <div class="update-progress" id="updateProgress" style="display:none;">
+                  <div class="update-progress-bar" id="updateProgressBar"></div>
+                </div>
+              </div>
+              <div class="update-actions">
+                <button class="btn btn-secondary btn-sm" id="btnCheckUpdates">Check</button>
+                <button class="btn btn-primary btn-sm" id="btnDownloadUpdate" style="display:none;">Download</button>
+                <button class="btn btn-primary btn-sm" id="btnInstallUpdate" style="display:none;">Restart</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Danger Zone -->
+          <div class="section-title">Danger Zone</div>
+          <div class="glass-card settings-card danger-zone">
+            <div class="setting-row">
+              <div class="setting-info">
+                <div class="setting-title">View Error Log</div>
+                <div class="setting-desc">Open the error log file for debugging</div>
+              </div>
+              <button class="btn btn-secondary btn-sm" id="btnViewErrors">View Log</button>
+            </div>
+            <div class="divider"></div>
+            <div class="setting-row">
+              <div class="setting-info">
+                <div class="setting-title">Reset All Settings</div>
+                <div class="setting-desc">Clear everything and return to the welcome screen</div>
+              </div>
+              <button class="btn btn-danger btn-sm" id="btnResetSettings">Reset</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+  </div>
+
+  <script src="styles-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

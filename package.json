@@ -1,0 +1,58 @@
+{
+  "name": "openvoice",
+  "version": "1.0.0",
+  "description": "OpenVoice — Free, open-source AI voice dictation for Windows. Speak naturally, get polished text anywhere.",
+  "main": "src/main/main.js",
+  "license": "MIT",
+  "author": "OpenVoice Contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/arash-san/openvoice.git"
+  },
+  "bugs": {
+    "url": "https://github.com/arash-san/openvoice/issues"
+  },
+  "homepage": "https://github.com/arash-san/openvoice#readme",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder",
+    "package": "electron-builder --win --x64",
+    "release": "electron-builder --win --x64 --publish always"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "electron-store": "^8.2.0",
+    "electron-updater": "^6.8.3",
+    "node-key-sender": "^1.0.11"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.openvoice.app",
+    "productName": "OpenVoice",
+    "artifactName": "${productName}-Setup-${version}.${ext}",
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*"
+    ],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "arash-san",
+        "repo": "openvoice",
+        "releaseType": "release"
+      }
+    ]
+  }
+}
