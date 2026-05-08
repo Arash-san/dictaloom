@@ -23,6 +23,34 @@ let recordingStartTime = null;
 let recordingTimerInterval = null;
 let currentUpdateStatus = { status: 'idle', message: 'Update checks are ready.' };
 
+const DEFAULT_GEMINI_MODEL = 'gemini-3.1-flash-lite-preview';
+const PREFERRED_GEMINI_MODELS = [
+  'gemini-3.1-flash-lite',
+  DEFAULT_GEMINI_MODEL,
+  'gemini-3-flash-preview',
+  'gemini-2.5-flash-lite',
+  'gemini-2.5-flash'
+];
+const BLOCKED_MODEL_ID_PATTERNS = [
+  'embedding',
+  'aqa',
+  'imagen',
+  'veo',
+  'image',
+  'tts',
+  'live',
+  'computer',
+  'learnlm'
+];
+const BLOCKED_MODEL_TEXT_PATTERNS = [
+  'nano banana',
+  'nano-banana',
+  'text-to-speech',
+  'text to speech',
+  'computer use',
+  'computer-use'
+];
+
 // ============================================
 // Error Logging
 // ============================================
@@ -339,8 +367,31 @@ async function saveSetting(key, value) {
   await api.setSetting(key, value);
 }
 
+function normalizeModelId(modelId) {
+  return (modelId || '').replace(/^models\//, '').toLowerCase();
+}
+
+function isBlockedModel(model) {
+  const id = normalizeModelId(typeof model === 'string' ? model : (model.id || model.name));
+  const name = typeof model === 'string' ? '' : (model.displayName || model.name || '');
+  const desc = typeof model === 'string' ? '' : (model.description || '');
+  const text = `${name} ${desc}`.toLowerCase();
+
+  return BLOCKED_MODEL_ID_PATTERNS.some(pattern => id.includes(pattern))
+    || BLOCKED_MODEL_TEXT_PATTERNS.some(pattern => text.includes(pattern));
+}
+
+function pickPreferredGeminiModel(models) {
+  const availableIds = models.map(m => normalizeModelId(m.id));
+  const preferred = PREFERRED_GEMINI_MODELS.find(id => availableIds.includes(id));
+  return preferred || models[0]?.id || DEFAULT_GEMINI_MODEL;
+}
+
 function getSelectedModel() {
-  return settings.geminiModel || 'gemini-2.5-flash';
+  if (settings.geminiModel && !isBlockedModel(settings.geminiModel)) {
+    return settings.geminiModel;
+  }
+  return DEFAULT_GEMINI_MODEL;
 }
 
 async function fetchAvailableModels() {
@@ -354,7 +405,6 @@ async function fetchAvailableModels() {
 
     // Voice-capable keywords — models that can handle audio input
     const voiceCapablePatterns = ['flash', 'pro', '2.5', '2.0', '3.0', '3.1'];
-    const excludePatterns = ['embedding', 'aqa', 'imagen', 'veo', 'text-embedding', 'learnlm'];
 
     const models = (data.models || [])
       .filter(m => {
@@ -363,8 +413,8 @@ async function fetchAvailableModels() {
         const desc = (m.description || '').toLowerCase();
         // Must support generateContent
         if (!methods.includes('generateContent')) return false;
-        // Exclude non-generative models
-        if (excludePatterns.some(p => id.includes(p))) return false;
+        // Exclude image, Nano Banana, TTS, Live, computer-use, and other non-dictation models
+        if (isBlockedModel(m)) return false;
         // Must be a gemini model
         if (!id.startsWith('gemini')) return false;
         // Check for multimodal/audio support in description or modern model versions
@@ -383,6 +433,13 @@ async function fetchAvailableModels() {
         };
       })
       .sort((a, b) => {
+        const getPreference = (id) => {
+          const index = PREFERRED_GEMINI_MODELS.indexOf(normalizeModelId(id));
+          return index === -1 ? Number.MAX_SAFE_INTEGER : index;
+        };
+        const preferenceDiff = getPreference(a.id) - getPreference(b.id);
+        if (preferenceDiff !== 0) return preferenceDiff;
+
         const getVersion = (id) => {
           const match = id.match(/(\d+\.\d+)/);
           return match ? parseFloat(match[1]) : 0;
@@ -394,8 +451,8 @@ async function fetchAvailableModels() {
     renderModelCards();
 
     // Auto-select best model if none is saved
-    if (!settings.geminiModel && models.length > 0) {
-      const best = models[0].id;
+    if ((!settings.geminiModel || isBlockedModel(settings.geminiModel)) && models.length > 0) {
+      const best = pickPreferredGeminiModel(models);
       await saveSetting('geminiModel', best);
       settings.geminiModel = best;
       renderModelCards();

@@ -15,7 +15,7 @@ OpenVoice is a lightweight Electron app that uses your own Google Gemini API key
 
 - System-wide dictation shortcut for typing into any Windows app
 - Command mode for voice-driven edits to selected text
-- Gemini-powered transcription, formatting, and model selection
+- Gemini 3.1 Flash-Lite by default, with filtered model selection for dictation-safe text output models
 - Personal dictionary for names, technical terms, and custom vocabulary
 - Voice snippets that expand spoken trigger phrases into reusable text
 - Floating recording overlay and a quick microphone test panel
