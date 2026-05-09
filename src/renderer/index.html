@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="OpenVoice — Free, open-source AI voice dictation. Speak naturally, get polished text anywhere.">
-  <title>OpenVoice</title>
+  <meta name="description" content="Dictaloom - free, open-source AI voice dictation. Speak naturally, get polished text anywhere.">
+  <title>Dictaloom</title>
   <link rel="stylesheet" href="styles/main.css">
   <link rel="stylesheet" href="styles/animations.css">
 </head>
@@ -19,7 +19,7 @@
 
     <!-- Window chrome (frameless) -->
     <div class="window-chrome drag-region" id="windowChrome">
-      <div class="window-title">OpenVoice</div>
+      <div class="window-title">Dictaloom</div>
       <div class="window-controls no-drag">
         <button class="win-btn win-minimize" id="btnMinimize" title="Minimize">&#x2013;</button>
         <button class="win-btn win-close" id="btnClose" title="Close to tray">&#x2715;</button>
@@ -55,7 +55,7 @@
                 <div class="logo-ring ring-3"></div>
               </div>
             </div>
-            <h1 class="heading-xl onboarding-title">Open<span class="text-accent">Voice</span></h1>
+            <h1 class="heading-xl onboarding-title">Dicta<span class="text-accent">loom</span></h1>
             <p class="text-secondary onboarding-subtitle">Free, open-source AI voice dictation.<br>Speak naturally. Get polished text. Anywhere.</p>
             <div class="feature-pills">
               <span class="pill">🎤 Voice to Text</span>
@@ -81,7 +81,7 @@
               <span class="step-dot"></span>
             </div>
             <h2 class="heading-lg">Connect your <span class="text-accent">Gemini</span> API</h2>
-            <p class="text-secondary">OpenVoice uses Google's Gemini AI to transcribe and format your speech. You need a free API key to get started.</p>
+            <p class="text-secondary">Dictaloom uses Google's Gemini AI to transcribe and format your speech. You need a free API key to get started.</p>
             
             <div class="api-key-card glass-card">
               <div class="input-group">
@@ -155,7 +155,7 @@
             <div class="onboarding-actions">
               <button class="btn btn-ghost" id="btnBack3">← Back</button>
               <button class="btn btn-primary" id="btnFinish">
-                Start Using OpenVoice
+                Start Using Dictaloom
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </button>
             </div>
@@ -175,7 +175,7 @@
               <path d="M26 38V42C26 50.837 33.163 58 42 58H40C31.163 58 24 50.837 24 42V38" stroke="url(#sideLogoGrad)" stroke-width="3" stroke-linecap="round" fill="none"/>
               <path d="M54 38V42C54 50.837 46.837 58 38 58H40C48.837 58 56 50.837 56 42V38" stroke="url(#sideLogoGrad)" stroke-width="3" stroke-linecap="round" fill="none"/>
             </svg>
-            <span class="sidebar-logo-text">OpenVoice</span>
+            <span class="sidebar-logo-text">Dictaloom</span>
           </div>
           
           <nav class="sidebar-nav">
@@ -287,7 +287,7 @@
               <h1 class="heading-lg">Personal Dictionary</h1>
               <button class="btn btn-primary btn-sm" id="btnAddWord">+ Add Word</button>
             </div>
-            <p class="text-secondary" style="margin-bottom: var(--space-lg);">Add custom words, names, and technical terms so OpenVoice always gets them right.</p>
+            <p class="text-secondary" style="margin-bottom: var(--space-lg);">Add custom words, names, and technical terms so Dictaloom always gets them right.</p>
             <div class="dictionary-input glass-card" id="dictionaryInput" style="display:none;">
               <div class="input-with-btn">
                 <input type="text" class="input" id="newWordInput" placeholder="Type a word or phrase...">
@@ -310,7 +310,7 @@
               <h1 class="heading-lg">Voice Snippets</h1>
               <button class="btn btn-primary btn-sm" id="btnAddSnippet">+ New Snippet</button>
             </div>
-            <p class="text-secondary" style="margin-bottom: var(--space-lg);">Create voice shortcuts — say a trigger phrase and OpenVoice will expand it into your full text.</p>
+            <p class="text-secondary" style="margin-bottom: var(--space-lg);">Create voice shortcuts - say a trigger phrase and Dictaloom will expand it into your full text.</p>
             <div class="snippet-form glass-card" id="snippetForm" style="display:none;">
               <div class="input-group">
                 <label>Trigger Phrase</label>
@@ -470,8 +470,20 @@
           <div class="glass-card settings-card">
             <div class="setting-row">
               <div class="setting-info">
+                <div class="setting-title">Theme</div>
+                <div class="setting-desc">Follow Windows by default, or choose a fixed appearance</div>
+              </div>
+              <select class="select" id="selectTheme" style="width: 200px;">
+                <option value="system">System</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+              </select>
+            </div>
+            <div class="divider"></div>
+            <div class="setting-row">
+              <div class="setting-info">
                 <div class="setting-title">Start with Windows</div>
-                <div class="setting-desc">Launch OpenVoice when you log in</div>
+                <div class="setting-desc">Launch Dictaloom when you log in</div>
               </div>
               <label class="toggle">
                 <input type="checkbox" id="toggleAutoLaunch">
@@ -518,7 +530,7 @@
           <div class="glass-card settings-card">
             <div class="setting-row">
               <div class="setting-info">
-                <div class="setting-title">OpenVoice</div>
+                <div class="setting-title">Dictaloom</div>
                 <div class="setting-desc" id="appVersionLabel">Version 1.0.0 - MIT License</div>
               </div>
               <button class="btn btn-ghost btn-sm" id="btnGitHub">

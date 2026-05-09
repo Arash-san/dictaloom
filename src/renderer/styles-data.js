@@ -1,5 +1,5 @@
 // ============================================
-// OpenVoice — Dictation Styles & App Mappings
+// Dictaloom - Dictation Styles & App Mappings
 // ============================================
 
 // Simple Icons CDN base URL

@@ -1,18 +1,18 @@
 {
-  "name": "openvoice",
-  "version": "1.0.1",
-  "description": "OpenVoice — Free, open-source AI voice dictation for Windows. Speak naturally, get polished text anywhere.",
+  "name": "dictaloom",
+  "version": "1.1.0",
+  "description": "Dictaloom - free, open-source AI voice dictation for Windows. Speak naturally, get polished text anywhere.",
   "main": "src/main/main.js",
   "license": "MIT",
-  "author": "OpenVoice Contributors",
+  "author": "Dictaloom Contributors",
   "repository": {
     "type": "git",
-    "url": "https://github.com/arash-san/openvoice.git"
+    "url": "https://github.com/arash-san/dictaloom.git"
   },
   "bugs": {
-    "url": "https://github.com/arash-san/openvoice/issues"
+    "url": "https://github.com/arash-san/dictaloom/issues"
   },
-  "homepage": "https://github.com/arash-san/openvoice#readme",
+  "homepage": "https://github.com/arash-san/dictaloom#readme",
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
@@ -31,16 +31,21 @@
     "electron-builder": "^25.1.8"
   },
   "build": {
-    "appId": "com.openvoice.app",
-    "productName": "OpenVoice",
+    "appId": "com.dictaloom.app",
+    "productName": "Dictaloom",
     "artifactName": "${productName}-Setup-${version}.${ext}",
     "win": {
       "target": "nsis",
-      "icon": "assets/icon.png"
+      "icon": "assets/icon.ico"
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "installerHeader": "assets/installer-header.bmp",
+      "installerSidebar": "assets/installer-sidebar.bmp",
+      "uninstallerSidebar": "assets/installer-sidebar.bmp"
     },
     "files": [
       "src/**/*",
@@ -50,7 +55,7 @@
       {
         "provider": "github",
         "owner": "arash-san",
-        "repo": "openvoice",
+        "repo": "dictaloom",
         "releaseType": "release"
       }
     ]

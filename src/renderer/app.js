@@ -1,8 +1,8 @@
 // ============================================
-// OpenVoice — Main Application Logic
+// Dictaloom - Main Application Logic
 // ============================================
 
-const api = window.openvoice;
+const api = window.dictaloom;
 
 // ============================================
 // State
@@ -146,6 +146,10 @@ window.addEventListener('unhandledrejection', (e) => {
 // ============================================
 document.addEventListener('DOMContentLoaded', async () => {
   settings = await api.getSettings();
+  applyTheme({
+    source: settings.theme || 'system',
+    shouldUseDarkColors: window.matchMedia?.('(prefers-color-scheme: dark)').matches
+  });
   errorLog = settings.errorLog || [];
   if (settings.onboarded && settings.apiKey) {
     showPage('pageMain');
@@ -156,7 +160,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   activeStyleId = settings.activeStyle || 'normal';
   setupIpcListeners();
   setupUpdateListeners();
+  setupThemeListeners();
   updateSettingsUI();
+  initTheme();
   initAppMetadata();
   updateDashboardStats();
   renderDictionary();
@@ -230,13 +236,14 @@ function bindEvents() {
   });
   document.getElementById('toggleFormatting')?.addEventListener('change', (e) => saveSetting('aiFormatting', e.target.checked));
   document.getElementById('selectLanguage')?.addEventListener('change', (e) => saveSetting('language', e.target.value));
+  document.getElementById('selectTheme')?.addEventListener('change', (e) => setTheme(e.target.value));
   document.getElementById('toggleAutoLaunch')?.addEventListener('change', (e) => {
     api.setAutoLaunch(e.target.checked);
   });
   document.getElementById('toggleKeepRecordings')?.addEventListener('change', (e) => saveSetting('keepSuccessRecordings', e.target.checked));
   document.getElementById('toggleOverlay')?.addEventListener('change', (e) => saveSetting('showOverlay', e.target.checked));
   document.getElementById('toggleSounds')?.addEventListener('change', (e) => saveSetting('sounds', e.target.checked));
-  document.getElementById('btnGitHub')?.addEventListener('click', () => api.openExternal('https://github.com/arash-san/openvoice'));
+  document.getElementById('btnGitHub')?.addEventListener('click', () => api.openExternal('https://github.com/arash-san/dictaloom'));
   document.getElementById('btnCheckUpdates')?.addEventListener('click', checkForUpdates);
   document.getElementById('btnDownloadUpdate')?.addEventListener('click', downloadUpdate);
   document.getElementById('btnInstallUpdate')?.addEventListener('click', installUpdate);
@@ -356,7 +363,7 @@ async function finishOnboarding() {
   await saveSetting('onboarded', true);
   settings.onboarded = true;
   showPage('pageMain');
-  showToast('Welcome to OpenVoice! 🎤', 'success');
+  showToast('Welcome to Dictaloom! 🎤', 'success');
 }
 
 // ============================================
@@ -507,8 +514,9 @@ async function selectModel(modelId) {
 
 async function resetAllSettings() {
   if (!confirm('Are you sure? This will clear your API key, dictionary, snippets, history, and all settings.')) return;
-  const keys = ['apiKey', 'onboarded', 'geminiModel', 'aiFormatting', 'language', 'autoLaunch',
-    'showOverlay', 'sounds', 'dictionary', 'snippets', 'history', 'stats', 'errorLog'];
+  const keys = ['apiKey', 'onboarded', 'geminiModel', 'aiFormatting', 'language', 'theme',
+    'autoLaunch', 'showOverlay', 'sounds', 'keepSuccessRecordings', 'dictionary', 'snippets',
+    'history', 'stats', 'errorLog'];
   for (const k of keys) await api.setSetting(k, undefined);
   settings = await api.getSettings();
   availableModels = [];
@@ -530,6 +538,8 @@ function updateSettingsUI() {
   if (fmt) fmt.checked = settings.aiFormatting !== false;
   const lang = document.getElementById('selectLanguage');
   if (lang) lang.value = settings.language || 'en';
+  const theme = document.getElementById('selectTheme');
+  if (theme) theme.value = settings.theme || 'system';
   const al = document.getElementById('toggleAutoLaunch');
   if (al) al.checked = settings.autoLaunch || false;
   const kr = document.getElementById('toggleKeepRecordings');
@@ -538,6 +548,47 @@ function updateSettingsUI() {
   if (ov) ov.checked = settings.showOverlay !== false;
   const snd = document.getElementById('toggleSounds');
   if (snd) snd.checked = settings.sounds !== false;
+}
+
+function applyTheme(themeInfo = {}) {
+  const source = themeInfo.source || settings.theme || 'system';
+  const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? true;
+  const shouldUseDarkColors = source === 'dark'
+    || (source === 'system' && (themeInfo.shouldUseDarkColors ?? prefersDark));
+
+  document.documentElement.dataset.theme = shouldUseDarkColors ? 'dark' : 'light';
+  document.documentElement.dataset.themeSource = source;
+}
+
+async function initTheme() {
+  try {
+    const themeInfo = await api.getThemeInfo?.();
+    if (themeInfo) applyTheme(themeInfo);
+  } catch (e) {
+    logError('initTheme', e);
+  }
+}
+
+function setupThemeListeners() {
+  if (!api.onThemeUpdated) return;
+  api.onThemeUpdated((themeInfo) => applyTheme(themeInfo));
+}
+
+async function setTheme(themeSource) {
+  settings.theme = themeSource;
+  applyTheme({
+    source: themeSource,
+    shouldUseDarkColors: window.matchMedia?.('(prefers-color-scheme: dark)').matches
+  });
+
+  try {
+    const themeInfo = await api.setAppTheme?.(themeSource);
+    if (themeInfo) applyTheme(themeInfo);
+    showToast(`Theme set to ${themeSource}`, 'success');
+  } catch (e) {
+    logError('setTheme', e);
+    await saveSetting('theme', themeSource);
+  }
 }
 
 async function initAppMetadata() {
@@ -790,16 +841,36 @@ function renderHistory() {
   list.innerHTML = history.map(h => {
     const date = new Date(h.timestamp);
     const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const id = String(h.id || '');
     return `
       <div class="history-item glass-card">
         <div class="history-meta">
           <span class="tag">${h.mode === 'command' ? '✨ Command' : '🎤 Dictation'}</span>
-          <span class="text-muted text-sm">${time}</span>
+          <div class="history-actions">
+            <span class="text-muted text-sm">${time}</span>
+            <button class="btn btn-ghost btn-sm history-copy-btn" onclick="copyHistoryItem('${escapeHtml(id)}')" title="Copy text">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              Copy
+            </button>
+          </div>
         </div>
         <div class="history-text">${escapeHtml(h.text)}</div>
       </div>
     `;
   }).join('');
+}
+
+async function copyHistoryItem(id) {
+  const item = (settings.history || []).find(h => String(h.id) === String(id));
+  if (!item) return;
+
+  try {
+    await api.copyText(item.text);
+    showToast('Copied to clipboard', 'success');
+  } catch (e) {
+    logError('copyHistoryItem', e);
+    showToast('Copy failed', 'error');
+  }
 }
 
 // ============================================
@@ -1479,5 +1550,6 @@ window.removeSnippet = removeSnippet;
 window.editSnippet = editSnippet;
 window.selectModel = selectModel;
 window.selectStyle = selectStyle;
+window.copyHistoryItem = copyHistoryItem;
 window.retryFailedRecording = retryFailedRecording;
 window.deleteFailedRecording = deleteFailedRecording;

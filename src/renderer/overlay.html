@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>OpenVoice Overlay</title>
+  <title>Dictaloom Overlay</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -216,8 +216,8 @@
     const timerText = document.getElementById('timerText');
     const states = { idle: 'Ready', listening: 'Listening...', processing: 'Processing...', done: 'Done!', error: 'Error' };
 
-    if (window.openvoice) {
-      window.openvoice.onOverlayState((state) => {
+    if (window.dictaloom) {
+      window.dictaloom.onOverlayState((state) => {
         overlay.className = 'overlay ' + state;
         statusText.textContent = states[state] || 'Ready';
         // Show timer only while listening
@@ -229,8 +229,8 @@
         }
       });
 
-      if (window.openvoice.onOverlayTimer) {
-        window.openvoice.onOverlayTimer((timeStr) => {
+      if (window.dictaloom.onOverlayTimer) {
+        window.dictaloom.onOverlayTimer((timeStr) => {
           if (timerText) {
             timerText.textContent = timeStr;
             timerText.style.display = '';

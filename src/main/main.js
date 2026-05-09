@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Tray, Menu, globalShortcut, ipcMain, clipboard, nativeImage, shell } = require('electron');
+const { app, BrowserWindow, Tray, Menu, globalShortcut, ipcMain, clipboard, nativeImage, shell, nativeTheme } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const fs = require('fs');
@@ -11,7 +11,7 @@ const MAX_LOG_SIZE = 5 * 1024 * 1024; // 5MB
 let logFilePath = null;
 
 function initLogger() {
-  logFilePath = path.join(app.getPath('userData'), 'openvoice.log');
+  logFilePath = path.join(app.getPath('userData'), 'dictaloom.log');
 }
 
 function writeLog(level, context, message, stack) {
@@ -56,6 +56,7 @@ const store = new Store({
     aiFormatting: true,
     geminiModel: '',
     language: 'en',
+    theme: 'system',
     autoLaunch: false,
     showOverlay: true,
     sounds: true,
@@ -81,6 +82,27 @@ let updateState = {
   version: app.getVersion(),
   isPackaged: app.isPackaged
 };
+
+function getThemeState() {
+  return {
+    source: nativeTheme.themeSource,
+    shouldUseDarkColors: nativeTheme.shouldUseDarkColors
+  };
+}
+
+function broadcastThemeState() {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('theme-updated', getThemeState());
+  }
+}
+
+function applyAppTheme(themeSource) {
+  const nextSource = ['system', 'light', 'dark'].includes(themeSource) ? themeSource : 'system';
+  nativeTheme.themeSource = nextSource;
+  store.set('theme', nextSource);
+  broadcastThemeState();
+  return getThemeState();
+}
 
 function sanitizeUpdateInfo(info) {
   if (!info) return null;
@@ -139,7 +161,7 @@ function setupAutoUpdater() {
 
   autoUpdater.on('update-not-available', (info) => {
     sendUpdateStatus('current', {
-      message: 'OpenVoice is up to date.',
+      message: 'Dictaloom is up to date.',
       updateInfo: sanitizeUpdateInfo(info),
       progress: null
     });
@@ -270,7 +292,7 @@ function createTray() {
   tray = new Tray(trayIcon);
 
   const contextMenu = Menu.buildFromTemplate([
-    { label: 'Show OpenVoice', click: () => mainWindow && mainWindow.show() },
+    { label: 'Show Dictaloom', click: () => mainWindow && mainWindow.show() },
     { type: 'separator' },
     { label: 'Start Dictation', click: () => startDictation() },
     { type: 'separator' },
@@ -283,7 +305,7 @@ function createTray() {
     }
   ]);
 
-  tray.setToolTip('OpenVoice — AI Voice Dictation');
+  tray.setToolTip('Dictaloom - AI Voice Dictation');
   tray.setContextMenu(contextMenu);
   tray.on('double-click', () => mainWindow && mainWindow.show());
 }
@@ -436,6 +458,11 @@ ipcMain.handle('inject-text', async (_, text) => {
   return true;
 });
 
+ipcMain.handle('copy-text', (_, text) => {
+  clipboard.writeText(String(text || ''));
+  return true;
+});
+
 ipcMain.handle('minimize-window', () => mainWindow && mainWindow.minimize());
 ipcMain.handle('close-window', () => mainWindow && mainWindow.hide());
 
@@ -469,6 +496,9 @@ ipcMain.handle('overlay-timer', (_, timeStr) => {
 ipcMain.handle('open-external', (_, url) => shell.openExternal(url));
 
 ipcMain.handle('register-shortcuts', () => registerShortcuts());
+
+ipcMain.handle('get-theme-info', () => getThemeState());
+ipcMain.handle('set-app-theme', (_, themeSource) => applyAppTheme(themeSource));
 
 ipcMain.handle('get-app-version', () => app.getVersion());
 ipcMain.handle('get-update-status', () => updateState);
@@ -528,7 +558,7 @@ ipcMain.handle('set-auto-launch', (_, enabled) => {
 
 ipcMain.handle('save-and-open-log', async (_, logContent) => {
   // Open the persistent log file instead of writing a temp one
-  const persistentLog = path.join(app.getPath('userData'), 'openvoice.log');
+  const persistentLog = path.join(app.getPath('userData'), 'dictaloom.log');
   // Also append the renderer error log for completeness
   if (logContent && logContent !== 'No errors recorded.') {
     fs.appendFileSync(persistentLog, '\n--- Renderer Error Log Snapshot ---\n' + logContent + '\n', 'utf-8');
@@ -594,7 +624,8 @@ ipcMain.handle('delete-failed-recording', async (_, baseName) => {
 // App lifecycle
 app.whenReady().then(() => {
   initLogger();
-  writeLog('INFO', 'app', 'OpenVoice starting up');
+  writeLog('INFO', 'app', 'Dictaloom starting up');
+  applyAppTheme(store.get('theme'));
   createMainWindow();
   createOverlayWindow();
   createTray();
@@ -605,6 +636,8 @@ app.whenReady().then(() => {
     app.setLoginItemSettings({ openAtLogin: true });
   }
 });
+
+nativeTheme.on('updated', broadcastThemeState);
 
 app.on('will-quit', () => {
   globalShortcut.unregisterAll();

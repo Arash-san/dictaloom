@@ -1,6 +1,6 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
-contextBridge.exposeInMainWorld('openvoice', {
+contextBridge.exposeInMainWorld('dictaloom', {
   // Settings
   getSettings: () => ipcRenderer.invoke('get-settings'),
   setSetting: (key, value) => ipcRenderer.invoke('set-setting', key, value),
@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld('openvoice', {
 
   // Text injection
   injectText: (text) => ipcRenderer.invoke('inject-text', text),
+  copyText: (text) => ipcRenderer.invoke('copy-text', text),
 
   // Window controls
   minimize: () => ipcRenderer.invoke('minimize-window'),
@@ -24,6 +25,10 @@ contextBridge.exposeInMainWorld('openvoice', {
 
   // Shortcuts
   registerShortcuts: () => ipcRenderer.invoke('register-shortcuts'),
+
+  // Theme
+  getThemeInfo: () => ipcRenderer.invoke('get-theme-info'),
+  setAppTheme: (themeSource) => ipcRenderer.invoke('set-app-theme', themeSource),
 
   // App updates
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
@@ -59,5 +64,10 @@ contextBridge.exposeInMainWorld('openvoice', {
     const handler = (_, state) => callback(state);
     ipcRenderer.on('update-status', handler);
     return () => ipcRenderer.removeListener('update-status', handler);
+  },
+  onThemeUpdated: (callback) => {
+    const handler = (_, state) => callback(state);
+    ipcRenderer.on('theme-updated', handler);
+    return () => ipcRenderer.removeListener('theme-updated', handler);
   },
 });
